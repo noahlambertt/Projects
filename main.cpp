@@ -1,10 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <cstring>
-#include <cctype>
-#include <cmath>
-#include <ctime>
-#include <cstdlib>
 using namespace std;
 
 void menu();
