@@ -2,6 +2,8 @@
 #include <vector>
 using namespace std;
 
+//This program asks the user to input any number of integers and then performs various tests on the list provided
+
 void menu();
 void printnum(vector<int> list);
 void addnum(vector<int> &list);
