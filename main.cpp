@@ -1,183 +1,86 @@
 #include <iostream>
-#include <vector>
+#include <string>
+#include <fstream>
+#include <filesystem>
+#include "Playlist.h"
 using namespace std;
 
-//This program asks the user to input any number of integers and then performs various tests on the list provided
-
 void menu();
-void printnum(vector<int> list);
-void addnum(vector<int> &list);
-void mean(vector<int> list);
-void smallest(vector<int> list);
-void largest(vector<int> list);
-void order(vector<int> &list);
 
 int main(){
     
-    vector<int> list{};
-    char input;
-    
-    cout << "Hello! Please select a choice." << endl;
-    menu();
+	Playlist list;
+    string song_name, song_artist;
+    int song_rating, song_compare, song_total;
+    ifstream playlist("Songs.txt");
+    ifstream artists("Artists.txt");
+    ifstream compare("Backpacking_data.txt");
+    ifstream ratings("Backpacking_rate.txt");
 
-    do{
-        cin >> input;
-        input = toupper(input);
+    while(getline(playlist, song_name)){
+        getline(artists, song_artist);
+        ratings >> song_rating;
+        compare >> song_compare;
+        compare >> song_total;
+        list.addsong(song_name, song_artist, song_rating, song_compare, song_total);
+    }
+    
+    menu();
+    int choice;
+    cin >> choice;
+    
+    if(choice == 1)
+        list.comparison();
+    if(choice == 2)
+        list.rate();
+    if(choice == 3)
+        list.change();
+    if(choice == 4)
+        list.showstats();
+    if(choice == 5)
+        list.order();
+    if(choice == 6)
+        list.numorder();
+    if(choice == 7)
+        list.ratingorder();
         
-        if (input == 'P')
-            printnum(list);
-        if (input == 'A')
-            addnum(list);
-        if (input == 'M')
-            mean(list);
-        if (input == 'S')
-            smallest(list);
-        if (input == 'L')
-            largest(list);
-        if (input == 'O')
-            order(list);
-        if (input == 'D')
-            menu();
-        
+    playlist.close();
+    artists.close();
+    compare.close();
+    ratings.close();
+    
+    if(choice == 1 || choice == 2 || choice == 3){
+    
+        filesystem::remove("Backpacking_data.txt");
+        filesystem::remove("Backpacking_rate.txt");
+        fstream new_file1;
+        new_file1.open("Backpacking_data.txt", ios::out);
+        if(new_file1.is_open())
+            for(int i = 0; i < list.getsize(); i++){
+                new_file1 << list.getcompare(i) << " ";
+                new_file1 << list.gettotal(i) << endl;
+            }
+    
+        fstream new_file2;
+        new_file2.open("Backpacking_rate.txt", ios::out);
+        if(new_file2.is_open())
+            for(int i = 0; i < list.getsize(); i++)
+                new_file2 << list.getrating(i) << endl;
             
-        }while (input != 'Q');
+        new_file1.close();
+        new_file2.close();
+        
+    }
+    return 0;
 }
 
 void menu(){
-    cout << "P - Print numbers" << endl;
-    cout << "A - Add a number" << endl;
-    cout << "M - Display mean of numbers" << endl;
-    cout << "S - Display the smallest number" << endl;
-    cout << "L - Display the largest number" << endl;
-    cout << "O - Switch the order of two numbers" << endl;
-    cout << "D - Display the menu" << endl;
-    cout << "Q - quit" << endl;
-}
-
-void printnum(vector<int> list){
-    if (list.size() == 0)
-            cout << "[] - The list is empty" << endl;
-        else{
-            cout << "[ ";
-            for(size_t i{0}; i < list.size(); i++)
-                cout << list.at(i) << " ";
-            cout << "]" << endl;
-        }
-}
-
-void addnum(vector<int> &list){
-    cout << "Please enter an integer to add to the list -->";
-    int num;
-    cin >> num;
-    list.push_back(num);
-    cout << num << " added" << endl;
-}
-
-void mean(vector<int> list){
-    if(list.size() == 0)
-        cout << "Unable to calculate the mean. The list is empty" << endl;
-    else{
-        int total = 0;
-        for(size_t i{0}; i < list.size(); i++)
-            total += list.at(i);
-        double mean = static_cast<double>(total) / list.size();
-        cout << "The mean is " << mean << endl;
-    }
-}
-
-
-void smallest(vector<int> list){
-    if (list.size() == 0)
-        cout << "Unable to determine the smallest number - list is empty" << endl;
-    else{
-        int small = list.at(0);
-        for(size_t i{0}; i < list.size(); i++)
-            if(list.at(i) < small)
-                small = list.at(i);
-        cout << "The smallest number is " << small << endl;   
-    }
-}
-
-void largest(vector<int> list){
-    if (list.size() == 0)
-        cout << "Unable to determine the largest number - list is empty" << endl;
-    else{
-        int large = list.at(0);
-        for(size_t i{0}; i < list.size(); i++)
-            if(list.at(i) > large)
-                large = list.at(i);
-        cout << "The largest number is " << large << endl;
-    }
-}
-
-void order(vector<int> &list){
-    if (list.size() <= 1)
-        cout << "Unable to switch the order of two elements - list has too few elements" << endl;
-    else{
-        cout << "Which two numbers would you like to switch? -->";
-        int num1, num2, index1 {0}, index2 {0}, pos1 {0}, pos2 {0};
-        cin >> num1 >> num2;
-        
-        for(size_t i{0}; i < list.size(); i++)
-            if(num1 == list.at(i))
-                index1++;
-        for(size_t i{0}; i < list.size(); i++)
-            if(num2 == list.at(i))
-                index2++;
-        
-        if(index1 == 0 || index2 == 0)
-            cout << "At least one element is not in the list" << endl;
-        else{
-            if(index1 > 1){
-                cout << "Which " << num1 << " would you like to switch? ";
-                int choice;
-                cin >> choice;
-                do{
-                    if(choice > index1){
-                        cout << "There are only " << index1 << " " << num1 << "s in the list" << endl;
-                        cin >> choice;
-                    }
-                    if(choice <= 0){
-                        cout << "You must select a number greater than 0" << endl;
-                        cin >> choice;
-                    }
-                }while(choice > index1 || choice <= 0);
-                index1 = choice;
-            }
-            if(index2 > 1){
-                cout << "Which " << num2 << " would you like to switch? ";
-                int choice;
-                cin >> choice;
-                do{
-                    if(choice > index2){
-                        cout << "There are only " << index2 << " " << num2 << "s in the list" << endl;
-                        cin >> choice;
-                    }
-                    if(choice <= 0){
-                        cout << "You must select a number greater than 0" << endl;
-                        cin >> choice;
-                    }
-                }while(choice > index2 || choice <= 0);
-                index2 = choice;
-            }
-                
-                for(size_t i{0}; index1 != 0; i++)
-                    if(list.at(i) == num1)
-                        pos1 = i, index1--;
-                    
-                for(size_t i{0}; index2 != 0; i++)
-                    if(list.at(i) == num2)
-                        pos2 = i, index2--;
-                
-            
-            int temp = list.at(pos1);
-            list.at(pos1) = list.at(pos2);
-            list.at(pos2) = temp; //Finally switching the two elements
-            
-            cout << "The new list is [ ";
-            for(size_t i{0}; i < list.size(); i++)
-                cout << list.at(i) << " ";
-            cout << "]" << endl;
-        }
-    }
+    cout << "What would you like to do?" << endl;
+    cout << "1. Preference between two songs" << endl;
+    cout << "2. Rate individual songs" << endl;
+    cout << "3. Change a rating" << endl;
+    cout << "4. Show your stats" << endl;
+    cout << "5. Show your stats in alphabetical order" << endl;
+    cout << "6. Show your stats by rating" << endl;
+    cout << "7. Show your stats by comparison rating" << endl;
 }
